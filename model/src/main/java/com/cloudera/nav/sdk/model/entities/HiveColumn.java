@@ -21,6 +21,9 @@ import com.cloudera.nav.sdk.model.HiveIdGenerator;
 import com.cloudera.nav.sdk.model.SourceType;
 import com.cloudera.nav.sdk.model.annotations.MClass;
 import com.cloudera.nav.sdk.model.annotations.MProperty;
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
 
 /**
  * Represents a Hive column; uniquely identified by the source id, database name,
@@ -30,10 +33,16 @@ import com.cloudera.nav.sdk.model.annotations.MProperty;
 @MClass(model="hv_column")
 public class HiveColumn extends Entity {
 
+  private final String DATABASE_NAME = "databaseName";
+  private final String TABLE_NAME = "tableName";
+  private final String COLUMN_NAME = "columnName";
+
   @MProperty
   private String databaseName;
   @MProperty
   private String tableName;
+  @MProperty
+  private String columnName;
 
   public HiveColumn() {
     setSourceType(SourceType.HIVE);
@@ -46,18 +55,11 @@ public class HiveColumn extends Entity {
     setDatabaseName(db);
     setTableName(table);
     setColumnName(column);
-    setIdentity(generateId());
   }
-  /**
-   * A Hive column is identified by the source id, database name, table name,
-   * and column name
-   *
-   * @return the entity id for this Hive column
-   */
-  @Override
-  public String generateId() {
-    return HiveIdGenerator.generateColumnId(getSourceId(), getDatabaseName(),
-        getTableName(), getColumnName());
+
+  public HiveColumn(String id) {
+    this();
+    setIdentity(id);
   }
 
   public String getDatabaseName() {
@@ -80,7 +82,7 @@ public class HiveColumn extends Entity {
    * @return the column name. Aliases {@link HiveColumn#getName}
    */
   public String getColumnName() {
-    return getName();
+    return columnName;
   }
 
   /**
@@ -88,7 +90,14 @@ public class HiveColumn extends Entity {
    * @param columnName
    */
   public void setColumnName(String columnName) {
-    setName(columnName);
+    this.columnName = columnName;
   }
 
+  @Override
+  public Map<String, String> getIdAttrsMap() {
+    return ImmutableMap.of(
+        DATABASE_NAME, this.getDatabaseName(),
+        TABLE_NAME, this.getTableName(),
+        COLUMN_NAME, this.getColumnName());
+  }
 }
